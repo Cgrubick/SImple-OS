@@ -1,0 +1,134 @@
+From 56308b868afdd370e8caeeace3b57f60f0688312 Mon Sep 17 00:00:00 2001
+From: Jakob Kaivo <jkk00010@mix.wvu.edu>
+Date: Tue, 30 Aug 2022 13:49:43 -0400
+Subject: [PATCH 8/8] clang
+
+---
+ Makefile         | 10 ++++------
+ kernel/Makefile  |  8 ++++----
+ lib/Makefile     | 10 +++++-----
+ lib/string.c     | 10 ++++++++++
+ modules/Makefile | 10 +++++-----
+ 5 files changed, 28 insertions(+), 20 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 4fa14e0..662d1ce 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,13 +1,11 @@
+ #
+ # Makefile for MPX
+ 
+-export PATH := /usr/local/cross/bin:$(PATH)
+-
+ AS	= nasm
+-CC	= i386-elf-gcc
+-CFLAGS  = -Wall -Wextra -Werror -nostartfiles -nodefaultlibs -nostdlib -g -c
+-LD	= i386-elf-ld
+-LDFLAGS = -T link.ld
++CC	= clang
++CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -nostartfiles -nodefaultlibs -nostdlib -g -c
++LD	= ld
++LDFLAGS = -melf_i386 -T link.ld
+ ASFLAGS = -f elf -g
+ 
+ OBJFILES =\
+diff --git a/kernel/Makefile b/kernel/Makefile
+index e2a8925..26a92a4 100644
+--- a/kernel/Makefile
++++ b/kernel/Makefile
+@@ -2,10 +2,10 @@
+ # Makefile for MPX/Linux
+ 
+ AS      = nasm
+-CC      = i386-elf-gcc
+-CFLAGS  = -Wall -Wextra -Werror -nostartfiles -nostdlib -nodefaultlibs -ffreestanding -g -c
+-LD      = i386-elf-ld
+-LDFLAGS = 
++CC      = clang
++CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -ffreestanding -g -c
++LD      = ld
++LDFLAGS = -melf_i386 -notsdlib -g
+ ASFLAGS = -f elf -g
+ 
+ OBJFILES =\
+diff --git a/lib/Makefile b/lib/Makefile
+index 32de078..8c3e5ae 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -2,10 +2,10 @@
+ # Makefile for MPX/Linux libs
+ 
+ AS      = nasm
+-CC      = i386-elf-gcc
+-CFLAGS  = -Wall -Wextra -Werror -nostartfiles -nostdlib -nodefaultlibs -ffreestanding -g -c
+-LD      = i386-elf-ld
+-LDFLAGS = 
++CC      = clang
++CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -ffreestanding -g -c
++LD      = ld
++LDFLAGS = -melf_i386
+ ASFLAGS = -f elf -g
+ 
+ OBJFILES =\
+@@ -21,7 +21,7 @@ string.o
+ all: lib.o
+ 
+ lib.o: $(OBJFILES)
+-	$(LD) -r -o lib.o $(OBJFILES)
++	$(LD) $(LDFLAGS) -r -o lib.o $(OBJFILES)
+ 
+ clean:
+ 	rm -f $(OBJFILES)
+diff --git a/lib/string.c b/lib/string.c
+index 2c7173f..ffa6b32 100644
+--- a/lib/string.c
++++ b/lib/string.c
+@@ -15,6 +15,16 @@
+  *  implemented :  See:  itoa		*
+  * ************************************ */
+ 
++void *memcpy(void *s1, void *s2, size_t n)
++{
++	unsigned char *dst = s1;
++	unsigned char *src = s2;
++	for (size_t i = 0; i < n; i++) {
++		dst[i] = src[i];
++	}
++	return s1;
++}
++
+ 
+ /*
+   Procedure..: strlen
+diff --git a/modules/Makefile b/modules/Makefile
+index 68c9a7b..89af423 100644
+--- a/modules/Makefile
++++ b/modules/Makefile
+@@ -2,10 +2,10 @@
+ # Makefile for MPX Modules
+ 
+ AS      = nasm
+-CC      = i386-elf-gcc
+-CFLAGS  = -Wall -Wextra -Werror -nostartfiles -nostdlib -nodefaultlibs -ffreestanding -g -c
+-LD      = i386-elf-ld
+-LDFLAGS = 
++CC      = clang
++CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -ffreestanding -g -c
++LD      = ld
++LDFLAGS = -melf_i386
+ ASFLAGS = -f elf -g
+ 
+ # add new files as you create them.
+@@ -23,7 +23,7 @@ mpx_supt.o
+ all: modules.o
+ 
+ modules.o: $(OBJFILES)
+-	$(LD) -r -o modules.o $(OBJFILES)
++	$(LD) $(LDFLAGS) -r -o modules.o $(OBJFILES)
+ 
+ clean:
+ 	rm -f modules.o $(OBJFILES)
+-- 
+2.30.2
+

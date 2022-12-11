@@ -1,0 +1,80 @@
+From 74a6d2456e0ddd4602bc026b21396d96c812ec99 Mon Sep 17 00:00:00 2001
+From: Jakob Kaivo <jkk00010@mix.wvu.edu>
+Date: Thu, 1 Sep 2022 14:42:44 -0400
+Subject: [PATCH] use the binutils linker on macOS
+
+---
+ Makefile         | 6 +++++-
+ kernel/Makefile  | 4 ++++
+ lib/Makefile     | 4 ++++
+ modules/Makefile | 4 ++++
+ 4 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 662d1ce..f994d29 100644
+--- a/Makefile
++++ b/Makefile
+@@ -4,7 +4,11 @@
+ AS	= nasm
+ CC	= clang
+ CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -nostartfiles -nodefaultlibs -nostdlib -g -c
+-LD	= ld
++ifeq ($(shell uname), Darwin)
++LD	= i686-elf-ld
++else
++LD      = ld
++endif
+ LDFLAGS = -melf_i386 -T link.ld
+ ASFLAGS = -f elf -g
+ 
+diff --git a/kernel/Makefile b/kernel/Makefile
+index 26a92a4..562a402 100644
+--- a/kernel/Makefile
++++ b/kernel/Makefile
+@@ -4,7 +4,11 @@
+ AS      = nasm
+ CC      = clang
+ CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -ffreestanding -g -c
++ifeq ($(shell uname), Darwin)
++LD	= i686-elf-ld
++else
+ LD      = ld
++endif
+ LDFLAGS = -melf_i386 -notsdlib -g
+ ASFLAGS = -f elf -g
+ 
+diff --git a/lib/Makefile b/lib/Makefile
+index 8c3e5ae..f23a2cc 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -4,7 +4,11 @@
+ AS      = nasm
+ CC      = clang
+ CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -ffreestanding -g -c
++ifeq ($(shell uname), Darwin)
++LD	= i686-elf-ld
++else
+ LD      = ld
++endif
+ LDFLAGS = -melf_i386
+ ASFLAGS = -f elf -g
+ 
+diff --git a/modules/Makefile b/modules/Makefile
+index 89af423..8bc62d8 100644
+--- a/modules/Makefile
++++ b/modules/Makefile
+@@ -4,7 +4,11 @@
+ AS      = nasm
+ CC      = clang
+ CFLAGS  = --target=i386-elf -Wall -Wextra -Werror -ffreestanding -g -c
++ifeq ($(shell uname), Darwin)
++LD	= i686-elf-ld
++else
+ LD      = ld
++endif
+ LDFLAGS = -melf_i386
+ ASFLAGS = -f elf -g
+ 
+-- 
+2.25.1
+
